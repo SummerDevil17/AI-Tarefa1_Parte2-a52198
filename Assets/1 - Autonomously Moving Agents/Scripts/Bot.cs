@@ -7,6 +7,7 @@ public class Bot : MonoBehaviour
 {
     [SerializeField] GameObject copReference;
     Drive copDriveReference;
+    Vector3 wanderTargetVector = Vector3.zero;
 
     NavMeshAgent botAgent;
 
@@ -19,7 +20,7 @@ public class Bot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Evade();
+        Wander();
     }
 
     void Seek(Vector3 location)
@@ -57,5 +58,20 @@ public class Bot : MonoBehaviour
 
         float lookAhead = targetDir.magnitude / botAgent.speed + copDriveReference.currentSpeed;
         Flee(copReference.transform.position + copReference.transform.forward * lookAhead);
+    }
+
+    void Wander()
+    {
+        float wanderRadius = 10f, wanderDistance = 10f, wanderJitter = 1.5f;
+
+        wanderTargetVector += new Vector3(wanderJitter * Random.Range(-1f, 1f), 0, wanderJitter * Random.Range(-1f, 1f));
+
+        wanderTargetVector.Normalize();
+        wanderTargetVector *= wanderRadius;
+
+        Vector3 targetLocal = wanderTargetVector + new Vector3(0, 0, wanderDistance);
+        Vector3 targetWorld = transform.InverseTransformVector(targetLocal);
+
+        Seek(targetWorld);
     }
 }
