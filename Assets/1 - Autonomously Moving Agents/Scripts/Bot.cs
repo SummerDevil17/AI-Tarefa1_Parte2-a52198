@@ -8,6 +8,7 @@ public class Bot : MonoBehaviour
     [SerializeField] GameObject copReference;
     Drive copDriveReference;
     Vector3 wanderTargetVector = Vector3.zero;
+    private bool hiding = false;
 
     NavMeshAgent botAgent;
 
@@ -20,19 +21,36 @@ public class Bot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (CanSeeCop()) { CleverHide(); }
+        if (hiding) { return; }
+
+        if (CanSeeCop() && CanSeeMe()) { CleverHide(); hiding = true; Invoke("FinishedHiding", 5f); }
+        else { Pursue(); }
     }
 
     bool CanSeeCop()
     {
         RaycastHit raycastInfo;
-        Vector3 copDirection = copReference.transform.position - this.transform.position;
-        if (Physics.Raycast(transform.position, copDirection, out raycastInfo))
+        Vector3 directionToCop = copReference.transform.position - this.transform.position;
+        float lookAngle = Vector3.Angle(transform.forward, directionToCop);
+
+        if (lookAngle < 60f && Physics.Raycast(transform.position, directionToCop, out raycastInfo))
         {
             if (raycastInfo.transform.gameObject.CompareTag("Cop")) { return true; }
         }
         return false;
     }
+
+    bool CanSeeMe()
+    {
+        Vector3 copDirection = this.transform.position - copReference.transform.position;
+        float copLookAngle = Vector3.Angle(copDirection, copReference.transform.forward);
+
+        if (copLookAngle < 60f) { return true; }
+
+        return false;
+    }
+
+    private void FinishedHiding() { hiding = false; }
 
     void Seek(Vector3 location)
     {
