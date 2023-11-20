@@ -20,7 +20,7 @@ public class Bot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Wander();
+        Hide();
     }
 
     void Seek(Vector3 location)
@@ -73,5 +73,24 @@ public class Bot : MonoBehaviour
         Vector3 targetWorld = transform.InverseTransformVector(targetLocal);
 
         Seek(targetWorld);
+    }
+
+    void Hide()
+    {
+        float dist = Mathf.Infinity;
+        Vector3 chosenHidingGO = Vector3.zero;
+
+        for (int i = 0; i < World.Instance.GetHidingGameObj().Length; i++)
+        {
+            Vector3 hidingDir = World.Instance.GetHidingGameObj()[i].transform.position - copReference.transform.position;
+            Vector3 hidingPos = World.Instance.GetHidingGameObj()[i].transform.position + hidingDir.normalized * 10f;
+
+            if (Vector3.Distance(this.transform.position, hidingPos) < dist)
+            {
+                chosenHidingGO = hidingPos;
+                dist = Vector3.Distance(this.transform.position, hidingPos);
+            }
+        }
+        Seek(chosenHidingGO);
     }
 }
