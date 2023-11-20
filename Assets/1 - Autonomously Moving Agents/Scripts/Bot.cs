@@ -23,7 +23,8 @@ public class Bot : MonoBehaviour
     {
         if (hiding) { return; }
 
-        if (CanSeeCop() && CanSeeMe()) { CleverHide(); hiding = true; Invoke("FinishedHiding", 5f); }
+        if (!IsCopInRange()) { Wander(); }
+        else if (CanSeeCop() && CanSeeMe()) { CleverHide(); hiding = true; Invoke("FinishedHiding", 5f); }
         else { Pursue(); }
     }
 
@@ -49,6 +50,8 @@ public class Bot : MonoBehaviour
 
         return false;
     }
+
+    bool IsCopInRange() { return Vector3.Distance(copReference.transform.position, transform.position) < 10f; }
 
     private void FinishedHiding() { hiding = false; }
 
