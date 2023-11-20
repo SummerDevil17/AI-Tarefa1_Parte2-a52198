@@ -20,7 +20,18 @@ public class Bot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CleverHide();
+        if (CanSeeCop()) { CleverHide(); }
+    }
+
+    bool CanSeeCop()
+    {
+        RaycastHit raycastInfo;
+        Vector3 copDirection = copReference.transform.position - this.transform.position;
+        if (Physics.Raycast(transform.position, copDirection, out raycastInfo))
+        {
+            if (raycastInfo.transform.gameObject.CompareTag("Cop")) { return true; }
+        }
+        return false;
     }
 
     void Seek(Vector3 location)
