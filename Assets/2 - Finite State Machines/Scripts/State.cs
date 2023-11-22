@@ -82,6 +82,12 @@ public class Idle : State
 
     public override void Update()
     {
+        if (CanSeePlayer())
+        {
+            nextState = new Pursue(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+
         if (Random.Range(0, 100) < 10)
         {
             nextState = new Patrol(npcGameObject, npcAgent, npcAnimator, playerTransform);
@@ -110,7 +116,15 @@ public class Patrol : State
 
     public override void Enter()
     {
-        currentCheckpointIndex = 0;
+        float shortestDistance = Mathf.Infinity;
+        for (int i = 0; i < GameEnvironment.Singleton.Checkpoints.Count; i++)
+        {
+            GameObject thisWaypoint = GameEnvironment.Singleton.Checkpoints[i];
+            float distance = Vector3.Distance(npcGameObject.transform.position, thisWaypoint.transform.position);
+
+            if (distance < shortestDistance) { currentCheckpointIndex = i - 1; shortestDistance = distance; }
+        }
+
         npcAnimator.SetTrigger("isWalking");
         base.Enter();
     }
@@ -124,6 +138,12 @@ public class Patrol : State
             else { currentCheckpointIndex++; }
 
             npcAgent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentCheckpointIndex].transform.position);
+        }
+
+        if (CanSeePlayer())
+        {
+            nextState = new Pursue(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
         }
     }
 
@@ -195,4 +215,27 @@ public class Attack : State
         base.Enter();
     }
 
+    public override void Update()
+    {
+        Vector3 direction = playerTransform.position - npcGameObject.transform.position;
+        float angle = Vector3.Angle(direction, npcGameObject.transform.forward);
+        direction.y = 0f;
+
+        npcAgent.transform.rotation = Quaternion.Slerp(npcGameObject.transform.rotation,
+                                                        Quaternion.LookRotation(direction),
+                                                        Time.deltaTime * rotationSpeed);
+
+        if (!CanAttackPlayer())
+        {
+            nextState = new Idle(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+    }
+
+    public override void Exit()
+    {
+        npcAnimator.ResetTrigger("isShooting");
+        shootAudioSource.Stop();
+        base.Exit();
+    }
 }

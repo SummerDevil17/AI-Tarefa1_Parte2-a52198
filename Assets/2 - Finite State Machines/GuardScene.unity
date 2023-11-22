@@ -1963,7 +1963,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4d5ec3b3dbb72e4784600b694c36fb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 1520082997}
+  playerTransform: {fileID: 1547649649}
 --- !u!1001 &830883468
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3136,9 +3136,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1330063778}
   m_SourcePrefab: {fileID: 100100000, guid: 600be4a371d7c41a58b162eb0d4ffdb7, type: 3}
---- !u!4 &1520082997 stripped
+--- !u!4 &1547649649 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 572105835304292498, guid: 600be4a371d7c41a58b162eb0d4ffdb7,
+  m_CorrespondingSourceObject: {fileID: 572323189224076289, guid: 600be4a371d7c41a58b162eb0d4ffdb7,
     type: 3}
   m_PrefabInstance: {fileID: 1520082996}
   m_PrefabAsset: {fileID: 0}
