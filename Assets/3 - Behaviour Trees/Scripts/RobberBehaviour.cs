@@ -11,6 +11,9 @@ public class RobberBehaviour : MonoBehaviour
     NavMeshAgent agent;
     BehaviourTree tree;
 
+    public enum ActionState { IDLE, WORKING }
+    ActionState state = ActionState.IDLE;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -30,14 +33,33 @@ public class RobberBehaviour : MonoBehaviour
 
     public Node.Status GotToDiamond()
     {
-        agent.SetDestination(diamond.transform.position);
-        return Node.Status.SUCCESS;
+        return GoToLocation(diamond.transform.position);
     }
 
     public Node.Status GotToVan()
     {
-        agent.SetDestination(van.transform.position);
-        return Node.Status.SUCCESS;
+        return GoToLocation(van.transform.position);
+    }
+
+    Node.Status GoToLocation(Vector3 destination)
+    {
+        float distanceToTarget = Vector3.Distance(destination, transform.position);
+        if (state == ActionState.IDLE)
+        {
+            agent.SetDestination(destination);
+            state = ActionState.WORKING;
+        }
+        else if (Vector3.Distance(agent.pathEndPosition, destination) >= 2f)
+        {
+            state = ActionState.IDLE;
+            return Node.Status.FAILURE;
+        }
+        else if (distanceToTarget < 2f)
+        {
+            state = ActionState.IDLE;
+            return Node.Status.SUCCESS;
+        }
+        return Node.Status.RUNNING;
     }
 
     void Update()
