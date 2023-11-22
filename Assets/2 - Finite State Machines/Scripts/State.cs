@@ -20,7 +20,7 @@ public class State
 
     float visionDistance = 10f;
     float visionAngle = 30f;
-    float shootDistance = 7f;
+    float attackDistance = 7f;
 
     public State(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
     {
@@ -42,6 +42,27 @@ public class State
         if (stage == EVENT.EXIT) { Exit(); return nextState; }
 
         return this;
+    }
+
+    public bool CanSeePlayer()
+    {
+        Vector3 direction = playerTransform.position - npcGameObject.transform.position;
+        float angle = Vector3.Angle(direction, npcGameObject.transform.forward);
+
+        if (direction.magnitude < visionDistance && angle < visionAngle)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool CanAttackPlayer()
+    {
+        Vector3 direction = playerTransform.position - npcGameObject.transform.position;
+
+        if (direction.magnitude < attackDistance) { return true; }
+
+        return false;
     }
 }
 
@@ -74,6 +95,7 @@ public class Idle : State
         base.Exit();
     }
 }
+
 public class Patrol : State
 {
     int currentCheckpointIndex = -1;
@@ -110,4 +132,67 @@ public class Patrol : State
         npcAnimator.ResetTrigger("isWalking");
         base.Exit();
     }
+}
+
+public class Pursue : State
+{
+    public Pursue(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+    : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.PURSUE;
+        npcAgent.speed = 5f;
+        npcAgent.isStopped = false;
+    }
+
+    public override void Enter()
+    {
+        npcAnimator.SetTrigger("isRunning");
+        base.Enter();
+    }
+
+    public override void Update()
+    {
+        npcAgent.SetDestination(playerTransform.position);
+
+        if (!npcAgent.hasPath) { return; }
+
+        if (CanAttackPlayer())
+        {
+            nextState = new Attack(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+        else if (!CanSeePlayer())
+        {
+            nextState = new Patrol(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+    }
+
+    public override void Exit()
+    {
+        npcAnimator.ResetTrigger("isRunning");
+        base.Exit();
+    }
+}
+
+public class Attack : State
+{
+    float rotationSpeed = 2f;
+    AudioSource shootAudioSource;
+
+    public Attack(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+    : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.ATTACK;
+        shootAudioSource = _npc.GetComponent<AudioSource>();
+    }
+
+    public override void Enter()
+    {
+        npcAnimator.SetTrigger("isShooting");
+        npcAgent.isStopped = true;
+        shootAudioSource.Play();
+        base.Enter();
+    }
+
 }
