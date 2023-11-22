@@ -10,6 +10,9 @@ public class RobberBehaviour : MonoBehaviour
     [SerializeField] GameObject frontDoor;
     [SerializeField] GameObject backDoor;
 
+    [Range(0, 1000)]
+    [SerializeField] int money = 800;
+
     NavMeshAgent agent;
     BehaviourTree tree;
 
@@ -25,6 +28,7 @@ public class RobberBehaviour : MonoBehaviour
         tree = new BehaviourTree();
         Sequence steal = new Sequence("Steal Something");
 
+        Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
         Leaf goToDiamond = new Leaf("Go To Diamond", GotToDiamond);
         Leaf goToVan = new Leaf("Go To Van", GotToVan);
         Leaf goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor);
@@ -35,12 +39,22 @@ public class RobberBehaviour : MonoBehaviour
         openDoor.AddChild(goToFrontDoor);
         openDoor.AddChild(goToBackDoor);
 
+        steal.AddChild(hasGotMoney);
         steal.AddChild(openDoor);
         steal.AddChild(goToDiamond);
         steal.AddChild(goToVan);
         tree.AddChild(steal);
 
         //tree.PrintTree();
+    }
+
+    public Node.Status HasMoney()
+    {
+        if (money >= 500)
+        {
+            return Node.Status.FAILURE;
+        }
+        return Node.Status.SUCCESS;
     }
 
     public Node.Status GotToDiamond()
@@ -78,12 +92,20 @@ public class RobberBehaviour : MonoBehaviour
             }
             return Node.Status.FAILURE;
         }
-        else { return status; }
+        return status;
     }
 
     public Node.Status GotToVan()
     {
-        return GoToLocation(van.transform.position);
+        Node.Status status = GoToLocation(van.transform.position);
+
+        if (status == Node.Status.SUCCESS)
+        {
+            money += 500;
+            Destroy(diamond.gameObject);
+            return Node.Status.SUCCESS;
+        }
+        return status;
     }
 
     Node.Status GoToLocation(Vector3 destination)
@@ -109,7 +131,7 @@ public class RobberBehaviour : MonoBehaviour
 
     void Update()
     {
-        if (treeStatus == Node.Status.RUNNING)
+        if (treeStatus != Node.Status.SUCCESS)
             treeStatus = tree.Process();
     }
 }
