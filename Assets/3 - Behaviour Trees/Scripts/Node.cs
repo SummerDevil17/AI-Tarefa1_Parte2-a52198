@@ -18,6 +18,11 @@ public class Node
         name = nodeName;
     }
 
+    public virtual Status Process()
+    {
+        return children[currentChild].Process();
+    }
+
     public void AddChild(Node childNode)
     {
         children.Add(childNode);
