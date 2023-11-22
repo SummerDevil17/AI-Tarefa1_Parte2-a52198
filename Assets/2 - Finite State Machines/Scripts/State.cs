@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 public class State
 {
-    public enum STATE { IDLE, PATROL, PURSUE, ATTACK, SLEEP }
+    public enum STATE { IDLE, PATROL, PURSUE, ATTACK, SLEEP, RUNAWAY }
 
     public enum EVENT { ENTER, UPDATE, EXIT }
 
@@ -64,6 +64,18 @@ public class State
 
         return false;
     }
+
+    public bool IsPlayerBehind()
+    {
+        Vector3 direction = npcGameObject.transform.position - playerTransform.position;
+        float angle = Vector3.Angle(direction, npcGameObject.transform.forward);
+
+        if (direction.magnitude < 2 && angle < visionAngle)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 public class Idle : State
@@ -91,6 +103,12 @@ public class Idle : State
         if (Random.Range(0, 100) < 10)
         {
             nextState = new Patrol(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+
+        if (IsPlayerBehind())
+        {
+            nextState = new RunAway(npcGameObject, npcAgent, npcAnimator, playerTransform);
             stage = EVENT.EXIT;
         }
     }
@@ -143,6 +161,12 @@ public class Patrol : State
         if (CanSeePlayer())
         {
             nextState = new Pursue(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+
+        if (IsPlayerBehind())
+        {
+            nextState = new RunAway(npcGameObject, npcAgent, npcAnimator, playerTransform);
             stage = EVENT.EXIT;
         }
     }
@@ -236,6 +260,49 @@ public class Attack : State
     {
         npcAnimator.ResetTrigger("isShooting");
         shootAudioSource.Stop();
+        base.Exit();
+    }
+}
+
+public class RunAway : State
+{
+    GameObject safePlaceGameObject;
+
+    public RunAway(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+    : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.RUNAWAY;
+        npcAgent.speed = 7f;
+        npcAgent.isStopped = false;
+    }
+
+    public override void Enter()
+    {
+        safePlaceGameObject = GameObject.FindGameObjectWithTag("Safe");
+
+        npcAgent.SetDestination(safePlaceGameObject.transform.position);
+        npcAnimator.SetTrigger("isRunning");
+        base.Enter();
+    }
+
+    public override void Update()
+    {
+        if (npcAgent.remainingDistance < 1f)
+        {
+            nextState = new Idle(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+
+        if (CanSeePlayer())
+        {
+            nextState = new Pursue(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
+        }
+    }
+
+    public override void Exit()
+    {
+        npcAnimator.ResetTrigger("isRunning");
         base.Exit();
     }
 }

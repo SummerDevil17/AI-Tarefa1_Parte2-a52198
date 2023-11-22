@@ -6,6 +6,10 @@ TagManager:
   tags:
   - hide
   - Cop
+  - CinemachineTarget
+  - Checkpoint
+  - Fire
+  - Safe
   layers:
   - Default
   - TransparentFX
