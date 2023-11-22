@@ -22,7 +22,7 @@ public class BehaviourTree : Node
 
     public override Status Process()
     {
-        return children[currentChild].Process();
+        return children[currentChildIndex].Process();
     }
 
     public void PrintTree()

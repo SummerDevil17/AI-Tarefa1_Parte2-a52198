@@ -7,6 +7,7 @@ public class RobberBehaviour : MonoBehaviour
 {
     [SerializeField] GameObject diamond;
     [SerializeField] GameObject van;
+    [SerializeField] GameObject backDoor;
 
     NavMeshAgent agent;
     BehaviourTree tree;
@@ -14,26 +15,35 @@ public class RobberBehaviour : MonoBehaviour
     public enum ActionState { IDLE, WORKING }
     ActionState state = ActionState.IDLE;
 
+    Node.Status treeStatus = Node.Status.RUNNING;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
 
         tree = new BehaviourTree();
-        Node steal = new Node("Steal Something");
+        Sequence steal = new Sequence("Steal Something");
         Leaf goToDiamond = new Leaf("Go To Diamond", GotToDiamond);
         Leaf goToVan = new Leaf("Go To Van", GotToVan);
+        Leaf goToBackDoor = new Leaf("Go To Back Door", GoToBackDoor);
 
+        steal.AddChild(goToBackDoor);
         steal.AddChild(goToDiamond);
+        steal.AddChild(goToBackDoor);
         steal.AddChild(goToVan);
         tree.AddChild(steal);
 
-        tree.PrintTree();
-        tree.Process();
+        //tree.PrintTree();
     }
 
     public Node.Status GotToDiamond()
     {
         return GoToLocation(diamond.transform.position);
+    }
+
+    public Node.Status GoToBackDoor()
+    {
+        return GoToLocation(backDoor.transform.position);
     }
 
     public Node.Status GotToVan()
@@ -49,12 +59,12 @@ public class RobberBehaviour : MonoBehaviour
             agent.SetDestination(destination);
             state = ActionState.WORKING;
         }
-        else if (Vector3.Distance(agent.pathEndPosition, destination) >= 2f)
+        else if (Vector3.Distance(agent.pathEndPosition, destination) >= 2)
         {
             state = ActionState.IDLE;
             return Node.Status.FAILURE;
         }
-        else if (distanceToTarget < 2f)
+        else if (distanceToTarget < 2)
         {
             state = ActionState.IDLE;
             return Node.Status.SUCCESS;
@@ -64,6 +74,7 @@ public class RobberBehaviour : MonoBehaviour
 
     void Update()
     {
-
+        if (treeStatus == Node.Status.RUNNING)
+            treeStatus = tree.Process();
     }
 }
