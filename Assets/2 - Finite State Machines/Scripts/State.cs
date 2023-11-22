@@ -43,73 +43,71 @@ public class State
 
         return this;
     }
+}
 
-    public class Idle : State
+public class Idle : State
+{
+    public Idle(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+    : base(_npc, _agent, _anim, _player)
     {
-        public Idle(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
-        : base(_npc, _agent, _anim, _player)
-        {
-            name = STATE.IDLE;
-        }
+        name = STATE.IDLE;
+    }
 
-        public override void Enter()
-        {
-            npcAnimator.SetTrigger("isIdle");
-            base.Enter();
-        }
+    public override void Enter()
+    {
+        npcAnimator.SetTrigger("isIdle");
+        base.Enter();
+    }
 
-        public override void Update()
+    public override void Update()
+    {
+        if (Random.Range(0, 100) < 10)
         {
-            if (Random.Range(0, 100) < 10)
-            {
-                nextState = new Patrol(npcGameObject, npcAgent, npcAnimator, playerTransform);
-                stage = EVENT.EXIT;
-            }
-            base.Update();
-        }
-
-        public override void Exit()
-        {
-            npcAnimator.ResetTrigger("isIdle");
-            base.Exit();
+            nextState = new Patrol(npcGameObject, npcAgent, npcAnimator, playerTransform);
+            stage = EVENT.EXIT;
         }
     }
-    public class Patrol : State
+
+    public override void Exit()
     {
-        int currentCheckpointIndex = -1;
+        npcAnimator.ResetTrigger("isIdle");
+        base.Exit();
+    }
+}
+public class Patrol : State
+{
+    int currentCheckpointIndex = -1;
 
-        public Patrol(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
-        : base(_npc, _agent, _anim, _player)
+    public Patrol(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+    : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.PATROL;
+        npcAgent.speed = 2f;
+        npcAgent.isStopped = false;
+    }
+
+    public override void Enter()
+    {
+        currentCheckpointIndex = 0;
+        npcAnimator.SetTrigger("isWalking");
+        base.Enter();
+    }
+
+    public override void Update()
+    {
+        if (npcAgent.remainingDistance < 1f)
         {
-            name = STATE.PATROL;
-            npcAgent.speed = 2f;
-            npcAgent.isStopped = false;
-        }
+            if (currentCheckpointIndex >= GameEnvironment.Singleton.Checkpoints.Count - 1)
+            { currentCheckpointIndex = 0; }
+            else { currentCheckpointIndex++; }
 
-        public override void Enter()
-        {
-            currentCheckpointIndex = 0;
-            npcAnimator.SetTrigger("isWalking");
-            base.Enter();
+            npcAgent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentCheckpointIndex].transform.position);
         }
+    }
 
-        public override void Update()
-        {
-            if (npcAgent.remainingDistance < 1f)
-            {
-                if (currentCheckpointIndex >= GameEnvironment.Singleton.Checkpoints.Count - 1)
-                { currentCheckpointIndex = 0; }
-                else { currentCheckpointIndex++; }
-
-                npcAgent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentCheckpointIndex].transform.position);
-            }
-            base.Update();
-        }
-
-        public override void Exit()
-        {
-            npcAnimator.ResetTrigger("isWalking");
-            base.Exit();
-        }
+    public override void Exit()
+    {
+        npcAnimator.ResetTrigger("isWalking");
+        base.Exit();
     }
 }
