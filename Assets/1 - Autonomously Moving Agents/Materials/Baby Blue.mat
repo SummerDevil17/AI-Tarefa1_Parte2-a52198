@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8019243988616078743
+--- !u!114 &-403339568364275941
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,9 +95,9 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 0
-    - _Glossiness: 0.5
+    - _Glossiness: 0
     - _GlossyReflections: 1
-    - _Metallic: 0.5
+    - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -112,7 +112,7 @@ Material:
     - _UseEmissiveMap: 0
     - _UseMetallicMap: 0
     - _UseNormalMap: 0
-    - _UseRoughnessMap: 0
+    - _UseRoughnessMap: 1
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.16078432, g: 0.37647063, b: 0.56078434, a: 1}

@@ -82,9 +82,9 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 0
-    - _Glossiness: 0.5
+    - _Glossiness: 0
     - _GlossyReflections: 1
-    - _Metallic: 0.5
+    - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -99,7 +99,7 @@ Material:
     - _UseEmissiveMap: 0
     - _UseMetallicMap: 0
     - _UseNormalMap: 0
-    - _UseRoughnessMap: 0
+    - _UseRoughnessMap: 1
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 0.8586633, b: 0, a: 1}
@@ -107,7 +107,7 @@ Material:
     - _UvOffset: {r: 0, g: 0, b: 0, a: 0}
     - _UvTiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
---- !u!114 &8316765828456607455
+--- !u!114 &2028762770204281750
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
